@@ -2,8 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z
   .object({
@@ -51,6 +54,7 @@ const formSchema = z
 type FormSchema = z.infer<typeof formSchema>;
 
 export const SignUpForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
     useState(false);
@@ -65,9 +69,24 @@ export const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: FormSchema) {
-    console.log("Form submitted");
-    console.log(values);
+  async function onSubmit(values: FormSchema) {
+    await authClient.signUp.email({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (error) => {
+          if (error.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("Email já cadastrado");
+            form.setError("email", { message: "Email já cadastrado" });
+          }
+          toast.error(error.error.message);
+        },
+      },
+    });
   }
 
   return (
