@@ -2,8 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z.object({
   email: z.email("Email é obrigatório").min(1, "Email é obrigatório"),
@@ -36,6 +39,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export const SignInForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormSchema>({
@@ -46,9 +50,33 @@ export const SignInForm = () => {
     },
   });
 
-  function onSubmit(values: FormSchema) {
-    console.log("Form submitted");
-    console.log(values);
+  async function onSubmit(values: FormSchema) {
+    await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (error) => {
+          if (error.error.code === "USER_NOT_FOUND") {
+            toast.error("Usuário não encontrado");
+            return form.setError("email", {
+              message: "Usuário não encontrado",
+            });
+          } else if (error.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+            toast.error("Email ou senha inválidos");
+            form.setError("email", {
+              message: "Email ou senha inválidos",
+            });
+            return form.setError("password", {
+              message: "Email ou senha inválidos",
+            });
+          }
+          toast.error(error.error.message);
+        },
+      },
+    });
   }
 
   return (
