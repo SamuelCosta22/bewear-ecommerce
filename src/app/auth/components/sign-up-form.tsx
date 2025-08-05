@@ -1,6 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -49,6 +51,10 @@ const formSchema = z
 type FormSchema = z.infer<typeof formSchema>;
 
 export const SignUpForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] =
+    useState(false);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -112,11 +118,26 @@ export const SignUpForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Digite sua senha"
-                        type="password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="Digite sua senha"
+                          type={showPassword ? "text" : "password"}
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,13 +148,32 @@ export const SignUpForm = () => {
                 name="passwordConfirmation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Confirmar Password</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Confirme sua senha"
-                        type="password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="Confirme sua senha"
+                          type={showPasswordConfirmation ? "text" : "password"}
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() =>
+                            setShowPasswordConfirmation(
+                              !showPasswordConfirmation,
+                            )
+                          }
+                        >
+                          {showPasswordConfirmation ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
