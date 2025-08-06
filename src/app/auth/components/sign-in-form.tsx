@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -79,6 +80,12 @@ export const SignInForm = () => {
     });
   }
 
+  const handleSignInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+    });
+  };
+
   return (
     <>
       <Card>
@@ -140,9 +147,18 @@ export const SignInForm = () => {
                 )}
               />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
               <Button type="submit" className="w-full">
                 Entrar
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                onClick={handleSignInWithGoogle}
+              >
+                <Image src="/google.svg" alt="Google" width={20} height={20} />
+                Entrar com o Google
               </Button>
             </CardFooter>
           </form>

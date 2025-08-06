@@ -51,8 +51,10 @@ export const Header = () => {
                       </Avatar>
 
                       <div>
-                        <h3 className="font-semibold">{session?.user?.name}</h3>
-                        <span className="text-muted-foreground block text-xs">
+                        <h3 className="font-semibold text-sm">
+                          {session?.user?.name}
+                        </h3>
+                        <span className="text-muted-foreground block text-xs truncate max-w-[150px]">
                           {session?.user?.email}
                         </span>
                       </div>
