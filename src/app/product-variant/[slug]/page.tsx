@@ -1,16 +1,14 @@
 import { eq } from "drizzle-orm";
-import { ShoppingBagIcon, ShoppingCartIcon } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import Footer from "@/components/common/footer";
 import ProductList from "@/components/common/product-list";
-import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { productTable, productVariantTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
-import QuantitySelector from "./components/quantity-selector";
+import ProductActions from "./components/product-actions";
 import VariantSelector from "./components/variant-selector";
 
 interface ProductVariantPageProps {
@@ -74,20 +72,7 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
           </h3>
         </div>
 
-        <div className="px-5">
-          <QuantitySelector />
-        </div>
-
-        <div className="flex flex-col space-y-2 px-5">
-          <Button size="lg" variant="outline" className="gap-2">
-            <ShoppingCartIcon className="size-4" />
-            Adicionar ao carrinho
-          </Button>
-          <Button size="lg" className="gap-2">
-            <ShoppingBagIcon className="size-4" />
-            Comprar agora
-          </Button>
-        </div>
+        <ProductActions productVariantId={productVariant.id} />
 
         <div className="px-5">
           <p className="text-muted-foreground text-sm">
