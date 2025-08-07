@@ -32,9 +32,11 @@ const CartItem = ({
           className="rounded-lg"
         />
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">{productName}</p>
+          <p className="max-w-[120px] truncate text-sm font-medium">
+            {productName}
+          </p>
           <p className="text-muted-foreground text-xs">{productVariantName}</p>
-          <div className="flex w-[95%] items-center justify-between rounded-lg border p-1">
+          <div className="flex w-[80px] items-center justify-between rounded-lg border p-1">
             <Button className="h-4 w-4" variant="ghost" onClick={() => {}}>
               <MinusIcon />
             </Button>
