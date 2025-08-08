@@ -3,6 +3,7 @@ import { Loader2, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
+import { decreaseCartProductQuantity } from "@/actions/decrease-cart-product-quantity";
 import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,17 @@ const CartItem = ({
     },
   });
 
+  const {
+    mutate: decreaseCartProductQuantityMutation,
+    isPending: isDecreasingCartProductQuantityPending,
+  } = useMutation({
+    mutationKey: ["decrease-cart-product-quantity"],
+    mutationFn: () => decreaseCartProductQuantity({ cartItemId: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
   const handleRemoveProductFromCart = () => {
     removeProductFromCartMutation(undefined, {
       onSuccess: () => {
@@ -46,11 +58,15 @@ const CartItem = ({
     });
   };
 
+  const handleDecreaseCartProductQuantity = () => {
+    decreaseCartProductQuantityMutation(undefined, {});
+  };
+
   return (
     <div
       className={cn(
         "flex items-center justify-between",
-        isPending && "opacity-40",
+        isPending || (isDecreasingCartProductQuantityPending && "opacity-40"),
       )}
     >
       <div className="flex items-center gap-3">
@@ -67,7 +83,11 @@ const CartItem = ({
           </p>
           <p className="text-muted-foreground text-xs">{productVariantName}</p>
           <div className="flex w-[80px] items-center justify-between rounded-lg border p-1">
-            <Button className="h-4 w-4" variant="ghost" onClick={() => {}}>
+            <Button
+              className="h-4 w-4"
+              variant="ghost"
+              onClick={handleDecreaseCartProductQuantity}
+            >
               <MinusIcon />
             </Button>
             <p className="text-xs">{quantity}</p>
