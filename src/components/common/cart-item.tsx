@@ -1,7 +1,11 @@
-import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
+import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
+import { cn } from "@/lib/utils";
 
 import { Button } from "../ui/button";
 
@@ -15,14 +19,40 @@ interface CartItemProps {
 }
 
 const CartItem = ({
+  id,
   productName,
   productVariantName,
   productVariantImageUrl,
   productVariantPriceInCents,
   quantity,
 }: CartItemProps) => {
+  const queryClient = useQueryClient();
+  const { mutate: removeProductFromCartMutation, isPending } = useMutation({
+    mutationKey: ["remove-product-from-cart"],
+    mutationFn: () => removeProductFromCart({ cartItemId: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
+  const handleRemoveProductFromCart = () => {
+    removeProductFromCartMutation(undefined, {
+      onSuccess: () => {
+        toast.success("Item removido com sucesso ✅");
+      },
+      onError: () => {
+        toast.error("Erro ao remover item ❌");
+      },
+    });
+  };
+
   return (
-    <div className="flex items-center justify-between">
+    <div
+      className={cn(
+        "flex items-center justify-between",
+        isPending && "opacity-40",
+      )}
+    >
       <div className="flex items-center gap-3">
         <Image
           src={productVariantImageUrl}
@@ -48,8 +78,17 @@ const CartItem = ({
         </div>
       </div>
       <div className="flex flex-col items-end justify-center gap-6">
-        <Button variant="outline" className="h-6 w-6">
-          <TrashIcon />
+        <Button
+          variant="outline"
+          className="h-6 w-6"
+          onClick={handleRemoveProductFromCart}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <TrashIcon />
+          )}
         </Button>
         <p className="text-xs font-bold">
           {formatCentsToBRL(productVariantPriceInCents)}
