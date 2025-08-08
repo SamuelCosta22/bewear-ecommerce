@@ -24,6 +24,12 @@ export const Cart = () => {
     queryFn: () => getCart(),
   });
 
+  const sortAddItens = cart?.items.sort((a, b) => {
+    if (a.createdAt > b.createdAt) return 1;
+    if (a.createdAt < b.createdAt) return -1;
+    return 0;
+  });
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -45,11 +51,12 @@ export const Cart = () => {
                     <Loader2 className="animate-spin" />
                   </div>
                 ) : (
-                  cart?.items.map((item) => (
+                  sortAddItens?.map((item) => (
                     <CartItem
                       key={item.id}
                       id={item.id}
                       productName={item.productVariant.product.name}
+                      productVariantId={item.productVariant.id}
                       productVariantName={item.productVariant.name}
                       productVariantImageUrl={item.productVariant.imageUrl}
                       productVariantPriceInCents={
