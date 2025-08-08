@@ -26,6 +26,7 @@ export const Header = () => {
       </Link>
 
       <div className="flex items-center gap-2">
+        <Cart />
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon">
@@ -82,7 +83,6 @@ export const Header = () => {
             </div>
           </SheetContent>
         </Sheet>
-        <Cart />
       </div>
     </header>
   );
