@@ -1,12 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
-import { addProductToCart } from "@/actions/add-cart-product";
-import { decreaseCartProductQuantity } from "@/actions/decrease-cart-product-quantity";
-import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
+import { useDecreaseCartProduct } from "@/hooks/mutations/use-decrease-product-quantity";
+import { useIncreaseCartProduct } from "@/hooks/mutations/use-increase-product-quantity";
+import { useRemoveProductFromCart } from "@/hooks/mutations/use-remove-product-from-cart";
 import { cn } from "@/lib/utils";
 
 import { Button } from "../ui/button";
@@ -30,36 +29,20 @@ const CartItem = ({
   productVariantPriceInCents,
   quantity,
 }: CartItemProps) => {
-  const queryClient = useQueryClient();
-  const { mutate: removeProductFromCartMutation, isPending } = useMutation({
-    mutationKey: ["remove-product-from-cart"],
-    mutationFn: () => removeProductFromCart({ cartItemId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  const {
+    mutate: removeProductFromCartMutation,
+    isPending: isRemovingProductFromCartPending,
+  } = useRemoveProductFromCart(id);
 
   const {
     mutate: decreaseCartProductQuantityMutation,
     isPending: isDecreasingCartProductQuantityPending,
-  } = useMutation({
-    mutationKey: ["decrease-cart-product-quantity"],
-    mutationFn: () => decreaseCartProductQuantity({ cartItemId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  } = useDecreaseCartProduct(id);
 
   const {
     mutate: increaseCartProductQuantityMutation,
     isPending: isIncreasingCartProductQuantityPending,
-  } = useMutation({
-    mutationKey: ["increase-cart-product-quantity"],
-    mutationFn: () => addProductToCart({ productVariantId, quantity: 1 }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  } = useIncreaseCartProduct(productVariantId);
 
   const handleRemoveProductFromCart = () => {
     removeProductFromCartMutation(undefined, {
@@ -87,7 +70,7 @@ const CartItem = ({
   };
 
   const isLoading =
-    isPending ||
+    isRemovingProductFromCartPending ||
     isDecreasingCartProductQuantityPending ||
     isIncreasingCartProductQuantityPending;
 
@@ -135,9 +118,9 @@ const CartItem = ({
           variant="outline"
           className="h-6 w-6"
           onClick={handleRemoveProductFromCart}
-          disabled={isPending}
+          disabled={isRemovingProductFromCartPending}
         >
-          {isPending ? (
+          {isRemovingProductFromCartPending ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (
             <TrashIcon />

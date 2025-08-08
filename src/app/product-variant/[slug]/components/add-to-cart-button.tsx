@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { addProductToCart } from "@/actions/add-cart-product";
 import { Button } from "@/components/ui/button";
+import { USE_CART_QUERY_KEY } from "@/hooks/queries/use-cart";
 
 interface AddToCartButtonProps {
   productVariantId: string;
@@ -25,7 +26,7 @@ const AddToCartButton = ({
         quantity,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: [USE_CART_QUERY_KEY] });
       toast.success("Produto adicionado ao carrinho");
     },
   });
