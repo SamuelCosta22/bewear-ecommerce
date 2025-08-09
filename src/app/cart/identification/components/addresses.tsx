@@ -8,6 +8,7 @@ import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
 import z from "zod";
 
+import { AddressDisplay } from "@/components/common/address-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
-import { formatAddress } from "@/helpers/address";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
@@ -79,10 +79,43 @@ const Addresses = ({
     },
   });
 
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const newAddress =
+        await createShippingAddressMutation.mutateAsync(values);
+      toast.success("Endereço criado com sucesso!");
+      form.reset();
+      setSelectedAddress(newAddress.id);
+
+      await updateCartShippingAddressMutation.mutateAsync({
+        shippingAddressId: newAddress.id,
+      });
+      toast.success("Endereço vinculado ao carrinho!");
+    } catch (error) {
+      toast.error("Erro ao criar endereço. Tente novamente.");
+      console.error(error);
+    }
+  };
+
+  const handleGoToPayment = async () => {
+    if (!selectedAddress || selectedAddress === "add_new") return;
+
+    try {
+      await updateCartShippingAddressMutation.mutateAsync({
+        shippingAddressId: selectedAddress,
+      });
+      toast.success("Endereço selecionado para entrega!");
+      router.push("/cart/confirmation");
+    } catch (error) {
+      toast.error("Erro ao selecionar endereço. Tente novamente.");
+      console.error(error);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Identificação</CardTitle>
+        <CardTitle className="font-medium">Endereço de entrega</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -103,14 +136,14 @@ const Addresses = ({
             )}
 
             {addresses?.map((address) => (
-              <Card key={address.id}>
+              <Card key={address.id} className="py-4">
                 <CardContent>
-                  <div className="flex items-start space-x-2">
+                  <div className="flex items-start space-x-2 text-justify">
                     <RadioGroupItem value={address.id} id={address.id} />
                     <div className="flex-1">
                       <Label htmlFor={address.id} className="cursor-pointer">
-                        <div>
-                          <p className="text-sm">{formatAddress(address)}</p>
+                        <div className="text-justify">
+                          <AddressDisplay address={address} />
                         </div>
                       </Label>
                     </div>
@@ -119,30 +152,50 @@ const Addresses = ({
               </Card>
             ))}
 
-            <Card>
+            <Card className="py-4">
               <CardContent>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="add_new" id="add_new" />
-                  <Label htmlFor="add_new">Adicionar novo endereço</Label>
+                  <Label htmlFor="add_new" className="text-xs">
+                    Adicionar novo endereço
+                  </Label>
                 </div>
               </CardContent>
             </Card>
           </RadioGroup>
         )}
 
+        {selectedAddress && selectedAddress !== "add_new" && (
+          <div className="mt-4">
+            <Button
+              onClick={handleGoToPayment}
+              className="w-full"
+              disabled={updateCartShippingAddressMutation.isPending}
+            >
+              {updateCartShippingAddressMutation.isPending
+                ? "Processando..."
+                : "Ir para pagamento"}
+            </Button>
+          </div>
+        )}
+
         {selectedAddress === "add_new" && (
           <Form {...form}>
-            <form className="mt-4 space-y-4">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="mt-4 space-y-4"
+            >
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-sm">Email</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Digite seu email"
+                          className="text-sm"
                           type="email"
                           {...field}
                         />
@@ -157,10 +210,11 @@ const Addresses = ({
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome completo</FormLabel>
+                      <FormLabel className="text-sm">Nome completo</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Digite seu nome completo"
+                          className="text-sm"
                           {...field}
                         />
                       </FormControl>
@@ -174,12 +228,13 @@ const Addresses = ({
                   name="cpf"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CPF</FormLabel>
+                      <FormLabel className="text-sm">CPF</FormLabel>
                       <FormControl>
                         <PatternFormat
                           format="###.###.###-##"
                           placeholder="000.000.000-00"
                           customInput={Input}
+                          className="text-sm"
                           {...field}
                         />
                       </FormControl>
@@ -193,11 +248,12 @@ const Addresses = ({
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Celular</FormLabel>
+                      <FormLabel className="text-sm">Celular</FormLabel>
                       <FormControl>
                         <PatternFormat
                           format="(##) #####-####"
                           placeholder="(11) 99999-9999"
+                          className="text-sm"
                           customInput={Input}
                           {...field}
                         />
@@ -212,7 +268,7 @@ const Addresses = ({
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CEP</FormLabel>
+                      <FormLabel className="text-sm">CEP</FormLabel>
                       <FormControl>
                         <PatternFormat
                           format="#####-###"
@@ -231,9 +287,13 @@ const Addresses = ({
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Endereço</FormLabel>
+                      <FormLabel className="text-sm">Endereço</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite seu endereço" {...field} />
+                        <Input
+                          placeholder="Digite seu endereço"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -245,9 +305,13 @@ const Addresses = ({
                   name="number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Número</FormLabel>
+                      <FormLabel className="text-sm">Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite o número" {...field} />
+                        <Input
+                          placeholder="Digite o número"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -259,10 +323,11 @@ const Addresses = ({
                   name="complement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Complemento</FormLabel>
+                      <FormLabel className="text-sm">Complemento</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Apto, bloco, etc. (opcional)"
+                          className="text-sm"
                           {...field}
                         />
                       </FormControl>
@@ -276,9 +341,13 @@ const Addresses = ({
                   name="neighborhood"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bairro</FormLabel>
+                      <FormLabel className="text-sm">Bairro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite o bairro" {...field} />
+                        <Input
+                          placeholder="Digite o bairro"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -290,9 +359,13 @@ const Addresses = ({
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cidade</FormLabel>
+                      <FormLabel className="text-sm">Cidade</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite a cidade" {...field} />
+                        <Input
+                          placeholder="Digite a cidade"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -304,9 +377,13 @@ const Addresses = ({
                   name="state"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado</FormLabel>
+                      <FormLabel className="text-sm">Estado</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite o estado" {...field} />
+                        <Input
+                          placeholder="Digite o estado"
+                          className="text-sm"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

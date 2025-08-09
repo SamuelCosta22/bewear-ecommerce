@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { cartTable } from "@/db/schema";
+import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import Addresses from "./components/addresses";
@@ -17,9 +17,18 @@ const CartIdentificationPage = async () => {
   }
 
   const cart = await db.query.cartTable.findFirst({
-    where: eq(cartTable.userId, session.user.id),
+    where: (cart, { eq }) => eq(cart.userId, session.user.id),
     with: {
-      items: true,
+      shippingAddress: true,
+      items: {
+        with: {
+          productVariant: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -27,10 +36,17 @@ const CartIdentificationPage = async () => {
     redirect("/");
   }
 
+  const shippingAddresses = await db.query.shippingAddressTable.findMany({
+    where: eq(shippingAddressTable.userId, session.user.id),
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="p-5">
-        <Addresses shippingAddresses={[]} defaultShippingAddressId={null} />
+        <Addresses
+          shippingAddresses={shippingAddresses}
+          defaultShippingAddressId={cart.shippingAddress?.id || null}
+        />
       </div>
     </div>
   );
