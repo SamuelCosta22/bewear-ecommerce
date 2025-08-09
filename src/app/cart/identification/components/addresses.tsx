@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CreditCard, Loader2, MapPinCheck, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -156,8 +157,12 @@ const Addresses = ({
               <CardContent>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="add_new" id="add_new" />
-                  <Label htmlFor="add_new" className="text-xs">
+                  <Label
+                    htmlFor="add_new"
+                    className="text-muted-foreground gap-2 text-xs"
+                  >
                     Adicionar novo endereço
+                    <Truck />
                   </Label>
                 </div>
               </CardContent>
@@ -172,9 +177,17 @@ const Addresses = ({
               className="w-full"
               disabled={updateCartShippingAddressMutation.isPending}
             >
-              {updateCartShippingAddressMutation.isPending
-                ? "Processando..."
-                : "Ir para pagamento"}
+              {updateCartShippingAddressMutation.isPending ? (
+                <>
+                  <Loader2 className="animate-spin gap-2" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="gap-2" />
+                  Ir para pagamento
+                </>
+              )}
             </Button>
           </div>
         )}
@@ -400,9 +413,17 @@ const Addresses = ({
                 }
               >
                 {createShippingAddressMutation.isPending ||
-                updateCartShippingAddressMutation.isPending
-                  ? "Salvando..."
-                  : "Salvar endereço"}
+                updateCartShippingAddressMutation.isPending ? (
+                  <>
+                    <Loader2 className="animate-spin gap-2" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <MapPinCheck className="gap-2" />
+                    Salvar endereço
+                  </>
+                )}
               </Button>
             </form>
           </Form>
