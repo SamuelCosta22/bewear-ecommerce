@@ -29,7 +29,7 @@ const CartIdentificationPage = async () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="px-5">
+      <div className="p-5">
         <Addresses shippingAddresses={[]} defaultShippingAddressId={null} />
       </div>
     </div>
