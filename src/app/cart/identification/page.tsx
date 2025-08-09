@@ -2,10 +2,12 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import Footer from "@/components/common/footer";
 import { db } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
+import CartSummary from "../components/cart-summary";
 import Addresses from "./components/addresses";
 
 const CartIdentificationPage = async () => {
@@ -36,18 +38,36 @@ const CartIdentificationPage = async () => {
     redirect("/");
   }
 
+  const cartTotalInCents = cart.items.reduce(
+    (acc, item) => acc + item.productVariant.priceInCents * item.quantity,
+    0,
+  );
+
   const shippingAddresses = await db.query.shippingAddressTable.findMany({
     where: eq(shippingAddressTable.userId, session.user.id),
   });
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="p-5">
+      <div className="space-y-4 p-5">
         <Addresses
           shippingAddresses={shippingAddresses}
           defaultShippingAddressId={cart.shippingAddress?.id || null}
         />
+        <CartSummary
+          subTotalInCents={cartTotalInCents}
+          totalInCents={cartTotalInCents}
+          products={cart.items.map((item) => ({
+            id: item.productVariant.id,
+            name: item.productVariant.product.name,
+            variant: item.productVariant.name,
+            quantity: item.quantity,
+            priceInCents: item.productVariant.priceInCents,
+            imageUrl: item.productVariant.imageUrl,
+          }))}
+        />
       </div>
+      <Footer />
     </div>
   );
 };
