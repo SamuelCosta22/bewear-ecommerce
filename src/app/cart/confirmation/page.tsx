@@ -10,6 +10,7 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 
 import CartSummary from "../components/cart-summary";
+import FinishOrderButton from "./components/finish-order-button";
 
 const ConfirmationPage = async () => {
   const session = await auth.api.getSession({
@@ -61,10 +62,7 @@ const ConfirmationPage = async () => {
                 <AddressDisplay address={cart.shippingAddress} />
               </CardContent>
             </Card>
-            <Button className="w-full gap-2" size="lg">
-              <TicketCheck />
-              Finalizar compra
-            </Button>
+            <FinishOrderButton />
           </CardContent>
         </Card>
         <CartSummary
