@@ -42,22 +42,24 @@ const FinishOrderButton = () => {
           <Image
             src="/illustration.svg"
             alt="Success"
-            width={300}
-            height={300}
+            width={240}
+            height={240}
             className="mx-auto"
           />
-          <DialogTitle className="mt-4 text-2xl">Pedido efetuado!</DialogTitle>
-          <DialogDescription className="font-medium">
-            Seu pedido foi efetuado com sucesso. Você pode acompanhar o status
-            na seção de “Meus Pedidos”.
-          </DialogDescription>
+          <div className="space-y-2">
+            <DialogTitle className="mt-2 text-xl">Pedido efetuado!</DialogTitle>
+            <DialogDescription className="text-sm">
+              Seu pedido foi efetuado com sucesso. Você pode acompanhar o status
+              na seção de “Meus Pedidos”.
+            </DialogDescription>
+          </div>
 
           <DialogFooter>
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="gap-2 font-medium">
               <ScrollText />
               Ver meus pedidos
             </Button>
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="outline" size="lg" className="font-medium" asChild>
               <Link href="/">
                 <Store />
                 Voltar para a loja
