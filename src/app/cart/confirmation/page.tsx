@@ -1,10 +1,8 @@
-import { TicketCheck } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AddressDisplay } from "@/components/common/address-display";
 import Footer from "@/components/common/footer";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";

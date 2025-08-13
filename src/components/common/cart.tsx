@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Loader2,
-  ShoppingBasketIcon,
-  ShoppingCart,
-  TicketCheck,
-} from "lucide-react";
+import { Loader2, ShoppingBasketIcon, TicketCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
